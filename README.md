@@ -1,10 +1,9 @@
 ### Torrent-O
 A Python Implementation of the BitTorrent Protocol with Event-Driven Twisted Framework
+Uses - 
 
-Features - 
+Twisted Framework
 
-  Uses Event-Driven Twisted Framework
+HTTP Requests
 
-  Graphical User Interface
-
-  Employs sequential data requesting strategy
+Bencoder
