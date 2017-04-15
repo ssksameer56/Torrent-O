@@ -7,3 +7,5 @@ Twisted Framework
 HTTP Requests
 
 Bencoder
+
+Currently Not Fully Implemented
