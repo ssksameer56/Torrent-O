@@ -1,0 +1,5 @@
+Need to Comment line 89-90 in bencode.py before installing
+run python setup.py install after commenting above lines
+Do not 'pip install bencoder'
+The repo contains errors described above
+Install via this folder
