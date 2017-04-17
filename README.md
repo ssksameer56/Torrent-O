@@ -8,4 +8,4 @@ HTTP Requests
 
 Bencoder
 
-Currently Not Fully Implemented
+This is a work in progress
