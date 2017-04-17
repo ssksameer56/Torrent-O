@@ -9,7 +9,8 @@ class FileReadWrite(object):
     def __init__(self, metainfo):
         'Initializes all the variables needed'
         self.file_pointer   = None
-        self.rem_pieces     = math.ceil(metainfo.info['pieces']/metainfo.info['piece_length'])
+        self.total_pieces   = math.ceil(len(metainfo.info['pieces'])/20)#Each piece is a 20byte hash
+	self.total_length   = metainfo.info['length']
         self.piece_index    = 0
         self.block_index    = 0
         self.offset         = 0
@@ -18,9 +19,11 @@ class FileReadWrite(object):
         self.block_size     = 16384 #Standard 16 KB Blocks
         self.data_buffer    = ''
         self.no_of_blocks   = math.ceil(self.piece_size/self.block_size)
-        self.pieces_completed = list()
+	self.completed	    = False        
+	self.pieces_completed = list()
         self.createInfoDict(metainfo)
         self.openFile(metainfo)
+    
     def createInfoDict(self, metainfo):
         'Create a list of hashes to compare recieved data'
         offset = 0
@@ -30,7 +33,7 @@ class FileReadWrite(object):
 
     def openFile(self, metainfo):
         'Create/Open File to Write'
-        self.file_pointer = open(metainfo.info['name'], "ab+")
+        self.file_pointer = open(metainfo.info['name'], "ab+") # or "wb+"
         # Need to seek?
         while True:
             self.data_buffer = self.file_pointer.read(self.piece_size)
@@ -43,15 +46,15 @@ class FileReadWrite(object):
                 self.piece_index += 1
         self.data_buffer = ''
 
-    def writeToBuffer(self, piece_index, block_index, data):
+    def writeToBuffer(self, piece_index, block_index, data, requester):
         'Creates a buffer for a specific piece'
         if piece_index == self.piece_index:
             self.data_buffer[block_index:block_index + self.block_size] = data
             block_index += 1
         if len(self.data_buffer) == self.piece_length:
-            self.writeToFile()
+            self.writeToFile(requester)
 
-    def writeToFile(self):
+    def writeToFile(self, requester):
         'Writes to a file when a piece is downloaded'
         hash_obj = hashlib.sha1()
         hash_obj.update(self.data_buffer)
@@ -65,6 +68,7 @@ class FileReadWrite(object):
             self.pieces_completed.append(self.piece_index)
             self.data_buffer = ''
             self.rem_pieces -= 1
+	    requester.incrementPiece()
 
     def havePiece(self, piece_index, block_index):
         'Checks if the client has the piece downloaded'

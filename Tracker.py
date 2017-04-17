@@ -1,20 +1,21 @@
 #Generates, handles and parses HTTP Trackers
-import struct #Only for ___main__
+import struct #Only for __main__
 import socket #Only for __main__
 import hashlib
 import requests
 import bencoder
 from Metainfo import Metainfo
+
 class Tracker(object):
     'A Class to handle all the functions and data related to trackers'
-    def __init__(self, metainfo):
+    def __init__(self, torrent, metainfo):
         'Initializes all variables'
         self.tracker_url= ""
         self.peer_id    = "-TR2110-000000000000"
         #TR2110 is the Peer Id for Transmission 2.1.10
         self.port               = 6114
-        self.uploaded           = ''
-        self.downloaded         = ''
+        self.uploaded           = 0
+        self.downloaded         = 0
         self.left               = 100
         self.event              = 'started'
         self.para_dict          = ""
@@ -25,7 +26,7 @@ class Tracker(object):
         self.incomplete         = "" #Leechers
         self.peers              = ""
         self.tracker_response   = ""
-        #self.findTorrentStatus(torrent)
+        self.findTorrentStatus(torrent)
         self.generateHTTPRequest(metainfo)
         self.httpRequest()
         self.parseTrackerResponse()
@@ -56,14 +57,13 @@ class Tracker(object):
         self.peers          = tracker_data['peers'] #Peers are binary or dictionary model
 
 
-
 if __name__ == "__main__":
-	a = Metainfo("abc.torrent")
-	b = Tracker(a)
-	print b.tracker_response.content
-	buf = b.peers
-	offset = 0	
-	while offset < len(buf):
+    a = Metainfo("abc.torrent")
+    b = Tracker(a)
+    print b.tracker_response.content
+    buf = b.peers
+    offset = 0
+    while offset < len(buf):
 		ii = struct.unpack_from("!i", buf, offset = offset)[0]
 		offset += 4
 		gg = struct.unpack_from("!H",buf, offset = offset)[0]

@@ -42,4 +42,4 @@ class Metainfo(object):
 
 if __name__ == "__main__":
 	abc = Metainfo("abc.torrent")
-	print abc.info_hash6
+	pprint(abc.info)

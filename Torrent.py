@@ -1,6 +1,7 @@
 #Class to handle all aspects of torrent
 import struct
 import socket
+import sys
 from Tracker import Tracker
 from MessagesAndHandshakes import Handshake
 from Metainfo import Metainfo
@@ -9,7 +10,7 @@ from RequestManager import Requester
 class  Torrent(object):
     'An object to handle all Torrent Activity'
     def __init__(self):
-        self.file_addr         = 'dd'
+        self.file_addr         = sys.argv[1]
         self.metainfo          = Metainfo(self.file_addr)
         self.tracker           = Tracker(self, self.metainfo)
         self.handshake         = Handshake(self.metainfo, self.tracker)

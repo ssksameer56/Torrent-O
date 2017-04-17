@@ -12,15 +12,15 @@ from Torrent import Torrent
 
 class PeerConnection(protocol.Protocol):
     'Class to handle a single TCP connection to a peer'
-    def __init__(self):
+    def __init__(self, torrent):
         'Initialize all important data'
-        self.torrent                    = Torrent()
+        self.torrent                    = torrent
         self.pending_requests           = 10
         self.client_interested          = True
         self.peer_interested            = False
         self.client_choked              = True
         #The client is always interested and looking for more peers
-        self.peer_choked 		        = False
+        self.peer_choked 		= False
         self.blocks_requested           = set()
         self.peer_has_pieces            = list()
         self.peer_bitfield              = bitarray(0*self.torrent.metainfo.no_of_pieces)
@@ -56,8 +56,11 @@ class PeerConnection(protocol.Protocol):
             flag = True
         if flag is True:
             self.factory.peers_handshaken.add(self.peer_ip, self.peer_port)
+	    self.peer_choked = False
             self.transport.write(str( MessagesAndHandshakes.Interested() ))
             self.transport.write(str( MessagesAndHandshakes.Bitfield(bitfield = self.bitfield) ))
+	else:
+	    self.transport.loseConnection()
 
     def parseMessages(self, data):
         'Parses message and redirects to appropriate function'
@@ -121,7 +124,6 @@ class PeerConnection(protocol.Protocol):
         'Writes the recieved data to a buffer'
         data = message.piece
         self.torrent.file_handler.writeToBuffer(message.index, message.begin, data)
-        self.torrent.requester.RemoveRequest(message.index, message.begin)
 
     def canSendRequests(self):
         'Checks if more requests to peer are possible'
@@ -132,7 +134,7 @@ class PeerConnection(protocol.Protocol):
 
     def sendNextRequest(self):
         'Sends next request to the peer'
-        piece_index, block_index = self.torrent.requester.generateNewRequest(self)
+        piece_index, block_index = self.torrent.requester.generateNewRequest()
         block_size = self.torrent.file_handler.block_size
         if piece_index in self.peer_has_pieces:
             msg_obj    = MessagesAndHandshakes.Request(index = piece_index,\
@@ -141,21 +143,26 @@ class PeerConnection(protocol.Protocol):
             self.transport.write(str(msg_obj))
             self.pending_requests += 1
             self.blocks_requested.add([piece_index, block_index])
+	else:
+	    self.transport.write(str(MessagesAndHandshakes.KeepAlive())
+	    self.torrent.requester.reEnqueueRequest(piece_index, block_index])
 
 class PeerConnectionFactory(protocol.ClientFactory):
     'Class to handle all TCP connections. Keeps track of all persistent information'
-    def __init__(self):
+    def __init__(self, torrent):
         'Initializes variables for TCP Factory'
-        self.peer_list            = self.torrent.peer_list
+        self.torrent              = torrent
+        self.peer_list            = torrent.peer_list
         self.peers_connected_to   = list()
         self.peers_handshaken     = list()
+
     def removePeer(self, peer_ip, peer_port):
         'Removes peer from active connections'
         self.peers_connected_to.remove((peer_ip, peer_port))
 
     def buildProtocol(self, addr):
         'Builds individial TCP Connections for each peer'
-        peer = PeerConnection()
+        peer = PeerConnection(self.torrent)
         self.peers_connected_to.append((addr.host, addr.port))
         return peer
 
