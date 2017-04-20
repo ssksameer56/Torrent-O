@@ -13,29 +13,28 @@ class Requester(object):
         self.piece_size             = torrent.file_handler.piece_size
         self.total_pieces           = torrent.file_handler.total_pieces
         self.no_of_blocks           = math.ceil(self.piece_size/self.block_size)
-	self.max_requests	    = 500
-	generateRequestQueue()
-    
+        self.total_requests         = ''
+        self.generateRequestQueue()
+
     def generateRequestQueue(self):
-	 'Generates a new Request Queue'
-	 total = 0	
-	 for i in range(self.no_of_blocks):
-	     self.request_queue.put([self.current_piece_index,i])
-	     total += 1
-	     if total >= self.max_requests:
-	        break;
+        'Generates a new Request Queue'
+        self.total_requests = 0
+        for i in range(int(self.no_of_blocks)):
+            self.request_queue.put([self.current_piece_index,i])
+            self.total_requests += 1
+
     def generateNewRequest(self):
-	 'Generates a new request to pass to peer'
-	 piece_index, block_ index = self.request_queue.get()
-	 return piece_index, block_index
+        'Generates a new request to pass to peer'
+        ret_index = self.request_queue.get() # ret_index = [piece_index, block_index]
+        return ret_index[0], ret_index[1]
 
     def incrementPiece(self):
-	'Modifies the Queue to generate a new one'
-	self.current_piece_index += 1
-	while self.request_queue.empty() is False:
-	    self.request_queue.put()
-	generateRequestQueue()
+        'Modifies the Queue to generate a new one'
+        self.current_piece_index += 1
+        while self.request_queue.empty() is False:
+            self.request_queue.get()
+        self.generateRequestQueue()
 
     def reEnqueueRequest(self, piece_index, block_index):
-	'Reenqueues the request if it is not satisfied'
-	self.request_queue.put([piece_index, block_index])
+        'Reenqueues the request if it is not satisfied'
+        self.request_queue.put([piece_index, block_index])

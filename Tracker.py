@@ -26,16 +26,18 @@ class Tracker(object):
         self.incomplete         = "" #Leechers
         self.peers              = ""
         self.tracker_response   = ""
-        self.findTorrentStatus(torrent)
+        #self.findTorrentStatus(torrent)
         self.generateHTTPRequest(metainfo)
         self.httpRequest()
         self.parseTrackerResponse()
+
     def findTorrentStatus(self, torrent):
         'Finds the status of torrent file'
         self.uploaded  = torrent.uploaded
         self.downloaded= torrent.downloaded
         self.left      = torrent.left
         self.peer_id    = torrent.peer_id
+
     def generateHTTPRequest(self, metainfo):
         'Creates a dictionary to pass to the Requests function'
         self.tracker_url    = metainfo.announce
@@ -44,11 +46,13 @@ class Tracker(object):
                                 'port':self.port, 'uploaded':self.uploaded,\
                                 'downloaded':self.downloaded, 'left':self.left,\
                                 'event':self.event}
+
     def httpRequest(self):
         'Issues a GET request to the respective tracker'
         url     = self.tracker_url
         params  = self.para_dict
         self.tracker_response = requests.get(url, params = params)
+
     def parseTrackerResponse(self):
         'Parses the HTTP response from trackers'
         tracker_data = bencoder.decode(self.tracker_response.content)
@@ -56,10 +60,9 @@ class Tracker(object):
         self.min_interval   = tracker_data['min interval']
         self.peers          = tracker_data['peers'] #Peers are binary or dictionary model
 
-
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     a = Metainfo("abc.torrent")
-    b = Tracker(a)
+    b = Tracker()
     print b.tracker_response.content
     buf = b.peers
     offset = 0
@@ -69,3 +72,4 @@ if __name__ == "__main__":
 		gg = struct.unpack_from("!H",buf, offset = offset)[0]
 		offset += 2
 		print socket.inet_ntoa(struct.pack("!i",ii)), gg, '\n'
+"""

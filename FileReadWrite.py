@@ -9,8 +9,8 @@ class FileReadWrite(object):
     def __init__(self, metainfo):
         'Initializes all the variables needed'
         self.file_pointer   = None
-        self.total_pieces   = math.ceil(len(metainfo.info['pieces'])/20)#Each piece is a 20byte hash
-	self.total_length   = metainfo.info['length']
+        self.total_pieces   = math.ceil(len(metainfo.info['pieces'])/20) #Pieces are 20byte hashes
+        self.total_length   = metainfo.info['length']
         self.piece_index    = 0
         self.block_index    = 0
         self.offset         = 0
@@ -19,33 +19,31 @@ class FileReadWrite(object):
         self.block_size     = 16384 #Standard 16 KB Blocks
         self.data_buffer    = ''
         self.no_of_blocks   = math.ceil(self.piece_size/self.block_size)
-	self.completed	    = False        
-	self.pieces_completed = list()
+        self.completed      = False
+        self.pieces_completed = list()
         self.createInfoDict(metainfo)
         self.openFile(metainfo)
-    
+	print self.__dict__
+
     def createInfoDict(self, metainfo):
         'Create a list of hashes to compare recieved data'
         offset = 0
-        while offset != len(metainfo.info['piece']):
-            self.piece_hash.append(self.metainfo.info['pieces'][offset:(offset+20)])
+        while offset != len(metainfo.info['pieces']):
+            self.piece_hash.append(metainfo.info['pieces'][offset:(offset+20)])
             offset += 20
 
     def openFile(self, metainfo):
         'Create/Open File to Write'
-        self.file_pointer = open(metainfo.info['name'], "ab+") # or "wb+"
-        # Need to seek?
+        self.file_pointer = open(metainfo.info['name'], "wb+")
         while True:
             self.data_buffer = self.file_pointer.read(self.piece_size)
             if len(self.data_buffer) < self.piece_size:
-                break
+		break
             hash_obj = hashlib.sha1()
             hash_obj.update(self.data_buffer)
             temp_piece = hash_obj.digest()
             if temp_piece == self.piece_hash[self.piece_index]:
                 self.piece_index += 1
-        self.data_buffer = ''
-
     def writeToBuffer(self, piece_index, block_index, data, requester):
         'Creates a buffer for a specific piece'
         if piece_index == self.piece_index:
@@ -64,18 +62,15 @@ class FileReadWrite(object):
             self.file_pointer.seek(offset, 0)
             self.file_pointer.write(self.data_buffer)
             self.block_index = 0
-            self.piece_index += 1
             self.pieces_completed.append(self.piece_index)
+            self.piece_index += 1
             self.data_buffer = ''
             self.rem_pieces -= 1
 	    requester.incrementPiece()
 
     def havePiece(self, piece_index, block_index):
         'Checks if the client has the piece downloaded'
-        if piece_index in self.pieces_completed:
-            return True
-        else:
-            return False
+        return bool(piece_index in self.pieces_completed)
 
     def readData(self, piece_index, block_index):
         'Reads Data to send to remote peer'
@@ -85,3 +80,8 @@ class FileReadWrite(object):
         data = self.file_pointer.read(self.block_size)
         self.file_pointer.seek(0, current_offset)
         return data
+
+    def torrentQuit(self):
+        'Completes writing file before quiting'
+        self.file_pointer.write(self.data_buffer)
+        self.file_pointer.close()

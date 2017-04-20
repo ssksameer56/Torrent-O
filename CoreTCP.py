@@ -30,14 +30,16 @@ class PeerConnection(protocol.Protocol):
 
     def connectionMade(self):
         'Handle successful connection to remote peer'
+	print "ss"
         self.factory 			= self.transport.connector.factory
         self.peer_ip 			= self.transport.connector.host
         self.peer_port 			= self.transport.connector.port
-        self.transport.write(self.torrent.handshake_message)
+        self.transport.write(str(self.torrent.handshake_message))
 
     def dataReceived(self, data):
         'Handles all incoming data'
-        message = data
+	print dd       
+	message = data
         if message[1:20] == "bittorrent protocol":
             self.parseHandshake(message)
         else:
@@ -61,6 +63,7 @@ class PeerConnection(protocol.Protocol):
             self.transport.write(str( MessagesAndHandshakes.Bitfield(bitfield = self.bitfield) ))
 	else:
 	    self.transport.loseConnection()
+	    self.factory.peers_connected_to.remove([self.peer_ip, self.peer_port])
 
     def parseMessages(self, data):
         'Parses message and redirects to appropriate function'
@@ -144,15 +147,15 @@ class PeerConnection(protocol.Protocol):
             self.pending_requests += 1
             self.blocks_requested.add([piece_index, block_index])
 	else:
-	    self.transport.write(str(MessagesAndHandshakes.KeepAlive())
-	    self.torrent.requester.reEnqueueRequest(piece_index, block_index])
+	    self.transport.write(str(MessagesAndHandshakes.KeepAlive()))
+	    self.torrent.requester.reEnqueueRequest([piece_index, block_index])
 
 class PeerConnectionFactory(protocol.ClientFactory):
     'Class to handle all TCP connections. Keeps track of all persistent information'
     def __init__(self, torrent):
         'Initializes variables for TCP Factory'
         self.torrent              = torrent
-        self.peer_list            = torrent.peer_list
+        self.peer_list            = self.torrent.peer_list
         self.peers_connected_to   = list()
         self.peers_handshaken     = list()
 
@@ -166,10 +169,11 @@ class PeerConnectionFactory(protocol.ClientFactory):
         self.peers_connected_to.append((addr.host, addr.port))
         return peer
 
-    def clientConnectionLost(self, connector):
+    def clientConnectionLost(self, connector, reason):
         'Handle connection loss to remote peer'
         self.removePeer(connector.host, connector.port)
 
-    def clientConnectionFailed(self, connector):
+    def clientConnectionFailed(self, connector, reason):
         'Handle connection failure to remote peer'
-        connector.connect() #Tries to reconnect
+	print str(reason)        
+	#connector.connect() #Tries to reconnect

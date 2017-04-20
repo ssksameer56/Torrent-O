@@ -11,13 +11,15 @@ class Metainfo(object):
 		self.create_date	= ""
 		self.comment		= ""
 		self.created_by		= ""
-		self.info		= ""
+		self.info			= ""
 		self.encoding		= ""
 		self.piece_length	= ""
 		self.info_hash		= ""
 		self.no_of_pieces	= ""
 		self.createMetainfo(file_addr)
 		self.generateInfohash()
+		print self.__dict__
+
 	def createMetainfo(self, file_arg):
 		'Bdecodes the torrent file to generate torrent data'
 		file_pointer = open(file_arg, "rb")
@@ -33,11 +35,12 @@ class Metainfo(object):
 		#self.encoding 		= temp_data['encoding']
 		del temp_data, file_data
 		file_pointer.close()
+
 	def generateInfohash(self):
 		'Bencodes the info dictionary and generates an SHA1 Hash'
 		temp_obj = hashlib.sha1()
 		temp_obj.update(bencoder.encode(self.info))
-		self.info_hash = temp_obj.digest()		
+		self.info_hash = temp_obj.digest()
 		del temp_obj
 
 if __name__ == "__main__":

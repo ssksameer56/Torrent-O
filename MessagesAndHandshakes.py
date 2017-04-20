@@ -22,7 +22,13 @@ class Handshake(object):
         self.reserved   = "\x00\x00\x00\x00\x00\x00\x00\x00"
         self.info_hash  = metainfo.info_hash
         self.peer_id    = tracker.peer_id
-        return self.str_len + self.str + self.reserved + self.info_hash+ self.peer_id
+        
+    def __str__(self):
+	return self.str_len + self.str + self.reserved + self.info_hash+ self.peer_id
+
+    def __len__(self):
+        return 49+ord(self.str_len)
+
 
 class Message(object):
     'Generic parent message class'
@@ -35,10 +41,10 @@ class Message(object):
             self.setupFromResponse(kwargs['response'])
         elif set(self.protocol_args + ([self.protocol_extended] if self.protocol_extended else []))\
                     == set(kwargs.keys()):
-            self.setupFromArgs(kwargs)
+            self.setupFromArgs(**kwargs)
 
     def setupFromResponse(self, response):
-        'Setup the message object if it iis reieved from remote peer'
+        'Setup the message object if it is reieved from remote peer'
         payload		= response
         self.length 	= struct.unpackfrom("!i", payload)
         if self.length != 0 :
@@ -52,17 +58,17 @@ class Message(object):
         if self.protocol_extended :
             setattr(self, self.protocol_extended, payload[offset:])
 
-def setupFromArgs(self, **kwargs):
-    'Setup the message object for sending to remote peer'
-    for arg in self.protocol_args:
-        data = struct.pack("!i", kwargs[arg])
-        setattr(self, arg, data)
-    if self.protocol_extended :
-        setattr(self, self.protocol_extended, kwargs[self.protocol_extended])
-    length = 0
-    if self.msg_id != '' :
-        length = sum(len(x) for x in kwargs.values()) + 1
-    self.msg_length = struct.pack("!i", length)
+    def setupFromArgs(self, **kwargs):
+        'Setup the message object for sending to remote peer'
+        for arg in self.protocol_args:
+            data = struct.pack("!i", kwargs[arg])
+            setattr(self, arg, data)
+        if self.protocol_extended :
+            setattr(self, self.protocol_extended, kwargs[self.protocol_extended])
+        length = 0
+        if self.msg_id != '' :
+            length = sum(len(x) for x in kwargs.values()) + 1
+        self.msg_length = struct.pack("!i", length)
 
     def __str__(self):
         'Modifies the defualt str function to return payload'
