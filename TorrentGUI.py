@@ -63,7 +63,7 @@ class TorrentGUI(object):
 	'Makes a button of selected torrent file'
 	def make_title_bar(self, path):
 		self.client.initTorrent(path, reactor)
-		self.title_button = self.make_button(client.torrent.metainfo.info['name'])
+		self.title_button = self.make_button(self.client.torrent.metainfo.info['name'])
 		self.outer_box.pack_start(self.title_button, False, False, 0)
 		self.outer_box.pack_start(self.title_button, False, False, 0)
 		self.title_button.show()

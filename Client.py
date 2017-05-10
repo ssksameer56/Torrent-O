@@ -1,4 +1,8 @@
 #Handle the Torrent Client for the user
+import pygtk
+pygtk.require('2.0')
+import gtk
+import easygui
 import sys
 from twisted.internet import reactor
 import CoreTCP
@@ -7,7 +11,7 @@ import MessagesAndHandshakes
 import Metainfo
 import RequestManager
 import Tracker
-import TorrentGUI
+from TorrentGUI import TorrentGUI
 from Torrent import Torrent
 
 class Client(object):
@@ -19,4 +23,5 @@ class Client(object):
 if __name__ == "__main__":
     client     = Client()
     client_gui = TorrentGUI(client)
+    gtk.main()
     client.torrent.torrentStart()

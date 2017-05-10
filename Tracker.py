@@ -36,7 +36,7 @@ class Tracker(object):
         self.uploaded  = torrent.uploaded
         self.downloaded= torrent.downloaded
         self.left      = torrent.left
-        self.peer_id    = torrent.peer_id
+        self.peer_id   = torrent.peer_id
 
     def generateHTTPRequest(self, metainfo):
         'Creates a dictionary to pass to the Requests function'
@@ -59,17 +59,3 @@ class Tracker(object):
         self.interval       = tracker_data['interval']
         self.min_interval   = tracker_data['min interval']
         self.peers          = tracker_data['peers'] #Peers are binary or dictionary model
-
-"""if __name__ == "__main__":
-    a = Metainfo("abc.torrent")
-    b = Tracker()
-    print b.tracker_response.content
-    buf = b.peers
-    offset = 0
-    while offset < len(buf):
-		ii = struct.unpack_from("!i", buf, offset = offset)[0]
-		offset += 4
-		gg = struct.unpack_from("!H",buf, offset = offset)[0]
-		offset += 2
-		print socket.inet_ntoa(struct.pack("!i",ii)), gg, '\n'
-"""
