@@ -1,4 +1,5 @@
 #Classes to Handle Messages and Handshakes
+import bitarray
 import struct
 import Tracker
 import Metainfo
@@ -18,13 +19,13 @@ class Handshake(object):
     def generateHandshake(self, metainfo, tracker):
         'Returns a payload containing handshake'
         self.str_len    = chr(19)
-        self.str        = "bittorrent protocol"
+        self.str        = "BitTorrent protocol"
         self.reserved   = "\x00\x00\x00\x00\x00\x00\x00\x00"
         self.info_hash  = metainfo.info_hash
         self.peer_id    = tracker.peer_id
-        
+
     def __str__(self):
-	return self.str_len + self.str + self.reserved + self.info_hash+ self.peer_id
+	return self.str_len + self.str + self.reserved + self.info_hash + self.peer_id
 
     def __len__(self):
         return 49+ord(self.str_len)
@@ -46,14 +47,14 @@ class Message(object):
     def setupFromResponse(self, response):
         'Setup the message object if it is reieved from remote peer'
         payload		= response
-        self.length 	= struct.unpackfrom("!i", payload)
+        self.length 	= struct.unpack_from("!i", payload)
         if self.length != 0 :
             self.msg_id = struct.unpack_from("!B", payload, 4) # 5th byte is the  msg_id
         else:
             self.msg_id = ''
         offset = 5 #Actual Data begins from 5th  byte
         for arg in self.protocol_args:
-            setattr(self, arg, struct.unpackfrom("!i", payload, offset))
+            setattr(self, arg, struct.unpack_from("!i", payload, offset))
             offset += 4
         if self.protocol_extended :
             setattr(self, self.protocol_extended, payload[offset:])

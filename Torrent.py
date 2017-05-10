@@ -1,6 +1,7 @@
 #Class to handle all aspects of torrent
 import struct
 import socket
+from bitarray import bitarray
 import sys
 from Tracker import Tracker
 from MessagesAndHandshakes import Handshake
@@ -19,10 +20,12 @@ class  Torrent(object):
         self.handshake_message = Handshake(self.metainfo, self.tracker)
         self.file_handler      = FileReadWrite(self.metainfo)
         self.requester         = Requester(self, self.metainfo)
+	self.bitfield          = bitarray(0*self.metainfo.no_of_pieces)
         self.peer_list         = list()
         self.buildPeerList()
         self.protocol_factory  = CoreTCP.PeerConnectionFactory(self)
 	print self.peer_list
+
     def buildPeerList(self):
         'Builds List of Peers from Tracker Data'
         temp_data = self.tracker.peers

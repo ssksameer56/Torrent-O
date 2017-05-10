@@ -16,6 +16,6 @@ class Client(object):
         self.torrent = Torrent(addr, reactor)
 
 if __name__ == "__main__":
-    print 1
+
     client = Client(sys.argv[1], reactor)
     client.torrent.torrentStart()

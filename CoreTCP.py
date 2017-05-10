@@ -35,12 +35,13 @@ class PeerConnection(protocol.Protocol):
         self.peer_ip 			= self.transport.connector.host
         self.peer_port 			= self.transport.connector.port
         self.transport.write(str(self.torrent.handshake_message))
+	self.factory.peers_connected_to.append([self.peer_ip, self.peer_port])
 
     def dataReceived(self, data):
         'Handles all incoming data'
-	print dd       
+	print data
 	message = data
-        if message[1:20] == "bittorrent protocol":
+        if message[1:20] == "BitTorrent protocol":
             self.parseHandshake(message)
         else:
             self.parseMessages(message)
@@ -49,18 +50,17 @@ class PeerConnection(protocol.Protocol):
 
     def parseHandshake(self, message):
         'Verifies the Handshake and proceeds to show interest and send bitfield'
-        flag = False
-        if  message[0] == self.handshake_message.str_len and \
-            message[1:20] == self.handshake_message.str and \
-            message[20:28] == self.handshake_message.reserved and \
-            message[28:48] == self.handshake_message.info_hash and \
-            message[48:68] == self.handshake_message.peer_id :
-            flag = True
+        flag = True
+        #if message[0] == self.torrent.handshake_message.str_len and \
+         #   message[1:20] == self.torrent.handshake_message.str) and \
+         #   message[20:28] == self.torrent.handshake_message.reserved and \
+         #   message[28:48] == self.torrent.handshake_message.info_hash :
+         #   flag = True
         if flag is True:
-            self.factory.peers_handshaken.add(self.peer_ip, self.peer_port)
+            self.factory.peers_handshaken.append([self.peer_ip, self.peer_port])
 	    self.peer_choked = False
             self.transport.write(str( MessagesAndHandshakes.Interested() ))
-            self.transport.write(str( MessagesAndHandshakes.Bitfield(bitfield = self.bitfield) ))
+            self.transport.write(str( MessagesAndHandshakes.Bitfield(bitfield = self.torrent.bitfield.tobytes())))
 	else:
 	    self.transport.loseConnection()
 	    self.factory.peers_connected_to.remove([self.peer_ip, self.peer_port])
@@ -74,16 +74,18 @@ class PeerConnection(protocol.Protocol):
         else:
             message =   {
                         0: lambda: MessagesAndHandshakes.Choke(response=data),
-			            1: lambda: MessagesAndHandshakes.Unchoke(response=data),
+			1: lambda: MessagesAndHandshakes.Unchoke(response=data),
                         2: lambda: MessagesAndHandshakes.Interested(response=data),
                         3: lambda: MessagesAndHandshakes.Not_Interested(response=data),
                         4: lambda: MessagesAndHandshakes.Have(response=data),
+			5: lambda: MessagesAndHandshakes.Bitfield(response=data),
                         6: lambda: MessagesAndHandshakes.Request(response=data),
                         7: lambda: MessagesAndHandshakes.Piece(response=data),
                         8: lambda: MessagesAndHandshakes.Cancel(response=data),
                         9: lambda: MessagesAndHandshakes.Port(response=data),
-                        }[struct.unpack_from("!B", data, 4)]()
-        self.processMessage(message)
+                        }[    struct.unpack('!b',data[4])[0]   ]()     # The 5th byte in 'data' is the message type/id 
+        
+	self.processMessage(message)
 
     def processMessage(self, message):
         'Takes action according to the type of message'
@@ -172,8 +174,9 @@ class PeerConnectionFactory(protocol.ClientFactory):
     def clientConnectionLost(self, connector, reason):
         'Handle connection loss to remote peer'
         self.removePeer(connector.host, connector.port)
+	#print str(reason)
 
     def clientConnectionFailed(self, connector, reason):
         'Handle connection failure to remote peer'
-	print str(reason)        
+	#print str(reason)     
 	#connector.connect() #Tries to reconnect

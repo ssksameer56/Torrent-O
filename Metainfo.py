@@ -18,7 +18,6 @@ class Metainfo(object):
 		self.no_of_pieces	= ""
 		self.createMetainfo(file_addr)
 		self.generateInfohash()
-		print self.__dict__
 
 	def createMetainfo(self, file_arg):
 		'Bdecodes the torrent file to generate torrent data'
