@@ -44,7 +44,6 @@ class  Torrent(object):
             if not(peer in self.protocol_factory.peers_connected_to):
                 self.reactor.connectTCP(peer['ip'], peer['port'], self.protocol_factory, timeout=30)
                 self.protocol_factory.peers_connected_to.append(peer)
-		print peer
 	self.reactor.run()
 	
 

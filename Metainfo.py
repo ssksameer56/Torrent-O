@@ -11,7 +11,7 @@ class Metainfo(object):
 		self.create_date	= ""
 		self.comment		= ""
 		self.created_by		= ""
-		self.info			= ""
+		self.info		= ""
 		self.encoding		= ""
 		self.piece_length	= ""
 		self.info_hash		= ""
@@ -42,6 +42,6 @@ class Metainfo(object):
 		self.info_hash = temp_obj.digest()
 		del temp_obj
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
 	abc = Metainfo("abc.torrent")
-	pprint(abc.info)
+	pprint(abc.info)"""

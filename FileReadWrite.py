@@ -23,7 +23,6 @@ class FileReadWrite(object):
         self.pieces_completed = list()
         self.createInfoDict(metainfo)
         self.openFile(metainfo)
-	print self.__dict__
 
     def createInfoDict(self, metainfo):
         'Create a list of hashes to compare recieved data'
