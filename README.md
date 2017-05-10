@@ -4,6 +4,8 @@ Uses -
 
 Twisted Framework
 
+PyGTK, EasyGUI
+
 HTTP Requests
 
 Bencoder
