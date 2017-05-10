@@ -7,15 +7,16 @@ import MessagesAndHandshakes
 import Metainfo
 import RequestManager
 import Tracker
+import TorrentGUI
 from Torrent import Torrent
 
 class Client(object):
     'Class to handle a torrent object and its interface'
-    def __init__(self, addr, reactor):
+    def initTorrent(self, addr, reactor):
         'Initializes all the variables'
         self.torrent = Torrent(addr, reactor)
 
 if __name__ == "__main__":
-
-    client = Client(sys.argv[1], reactor)
+    client     = Client()
+    client_gui = TorrentGUI(client)
     client.torrent.torrentStart()
