@@ -18,10 +18,9 @@ class Client(object):
     'Class to handle a torrent object and its interface'
     def initTorrent(self, addr, reactor):
         'Initializes all the variables'
-        self.torrent = Torrent(addr, reactor)
+	self.torrent = Torrent(addr, reactor)
 
 if __name__ == "__main__":
     client     = Client()
     client_gui = TorrentGUI(client)
     gtk.main()
-    client.torrent.torrentStart()

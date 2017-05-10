@@ -68,6 +68,7 @@ class TorrentGUI(object):
 		self.outer_box.pack_start(self.title_button, False, False, 0)
 		self.title_button.show()
 		self.outer_box.show()
+		self.client.torrent.torrentStart()
 
 	'Display a window for choosing a file and return the self.path of file chosen'
 	def openfile(self, widget, data = None):

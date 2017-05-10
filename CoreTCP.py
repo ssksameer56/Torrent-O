@@ -174,9 +174,9 @@ class PeerConnectionFactory(protocol.ClientFactory):
     def clientConnectionLost(self, connector, reason):
         'Handle connection loss to remote peer'
         self.removePeer(connector.host, connector.port)
-	#print str(reason)
+	print str(reason)
 
     def clientConnectionFailed(self, connector, reason):
         'Handle connection failure to remote peer'
-	#print str(reason)     
+	print str(reason)     
 	#connector.connect() #Tries to reconnect
