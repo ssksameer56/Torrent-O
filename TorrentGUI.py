@@ -65,7 +65,6 @@ class TorrentGUI(object):
 		self.client.initTorrent(path, reactor)
 		self.title_button = self.make_button(self.client.torrent.metainfo.info['name'])
 		self.outer_box.pack_start(self.title_button, False, False, 0)
-		self.outer_box.pack_start(self.title_button, False, False, 0)
 		self.title_button.show()
 		self.outer_box.show()
 		self.client.torrent.torrentStart()
