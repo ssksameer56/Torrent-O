@@ -13,17 +13,17 @@ import CoreTCP
 class  Torrent(object):
     'An object to handle all Torrent Activity'
     def __init__(self, addr, t_reactor):
-        self.reactor           = t_reactor
-        self.file_addr         = addr
-        self.metainfo          = Metainfo(self.file_addr)
-        self.tracker           = Tracker(self, self.metainfo)
-        self.handshake_message = Handshake(self.metainfo, self.tracker)
-        self.file_handler      = FileReadWrite(self.metainfo)
-        self.requester         = Requester(self, self.metainfo)
+	self.reactor           = t_reactor
+	self.file_addr         = addr
+	self.metainfo          = Metainfo(self.file_addr)
+	self.tracker           = Tracker(self, self.metainfo)
+	self.handshake_message = Handshake(self.metainfo, self.tracker)
+	self.file_handler      = FileReadWrite(self.metainfo)
+	self.requester         = Requester(self, self.metainfo)
 	self.bitfield          = bitarray(0*self.metainfo.no_of_pieces)
-        self.peer_list         = list()
-        self.buildPeerList()
-        self.protocol_factory  = CoreTCP.PeerConnectionFactory(self)
+	self.peer_list         = list()
+	self.buildPeerList()
+	self.protocol_factory  = CoreTCP.PeerConnectionFactory(self)
 	print self.peer_list
 
     def buildPeerList(self):

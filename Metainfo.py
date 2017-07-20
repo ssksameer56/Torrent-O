@@ -16,6 +16,8 @@ class Metainfo(object):
 		self.piece_length	= ""
 		self.info_hash		= ""
 		self.no_of_pieces	= ""
+		self.files		= []
+		self.length		= 0
 		self.createMetainfo(file_addr)
 		self.generateInfohash()
 
@@ -23,15 +25,40 @@ class Metainfo(object):
 		'Bdecodes the torrent file to generate torrent data'
 		file_pointer = open(file_arg, "rb")
 		file_data = file_pointer.read()
-		temp_data = bencoder.decode(file_data)
+		try:
+			temp_data = bencoder.decode(file_data)
+		except bencode.BTFailure:
+			raise ValueError("Invalid Torrent file")
+		if 'announce' not in temp_data or 'info' not in temp_data:
+			raise ValueError("Invalid Torrent file")
 		self.announce		= temp_data['announce']
-		self.announce_list	= temp_data['announce-list']
-		self.create_date	= temp_data['creation date']
-		self.comment		= temp_data['comment']
-		self.created_by		= temp_data['created by']
 		self.info		= temp_data['info']
+
+		if ('piece length' not in self.info
+			or 'pieces' not in self.info
+			or 'name' not in self.info):
+			raise ValueError("Invalid BitTorrent metainfo file format")
 		self.piece_length	= self.info['piece length']
-		#self.encoding 		= temp_data['encoding']
+		try:
+			if 'length' in self.info:
+				# Single file mode
+				self.directory = ''
+				self.files = [([self.info['name']], self.info['length'])]
+				self.length = self.info['length']
+			else:
+				# Multi file mode
+				self.directory = self.info['name']
+				for d in temp_data['info']['files']:
+					self.files.append((d['path'], d['length']))
+					self.length += d['length']
+		except:
+			raise ValueError("Invalid BitTorrent metainfo file format")
+
+		self.announce_list	= temp_data.get('announce-list', None)
+		self.create_date	= temp_data.get('creation date', None)
+		self.comment		= temp_data.get('comment', "")
+		self.created_by		= temp_data.get('created by', "")
+		self.encoding 		= temp_data.get('encoding', "")
 		del temp_data, file_data
 		file_pointer.close()
 
